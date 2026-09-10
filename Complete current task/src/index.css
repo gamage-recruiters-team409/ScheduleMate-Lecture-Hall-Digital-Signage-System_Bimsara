@@ -1,0 +1,74 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import 'tailwindcss';
+
+@theme inline {
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --color-navy-950: #07101E;
+  --color-navy-900: #0F1729;
+  --color-navy-800: #1A2540;
+  --color-navy-700: #243158;
+  --color-navy-600: #2E3E6E;
+  --color-navy-500: #3D5088;
+  --color-navy-400: #5A6FA8;
+  --color-navy-300: #8A9DC8;
+  --color-navy-200: #C0CDE8;
+  --color-navy-100: #E3E9F4;
+
+  --color-primary: #2563EB;
+  --color-primary-hover: #1D4ED8;
+  --color-primary-light: #EFF6FF;
+
+  --color-status-ongoing: #16A34A;
+  --color-status-ongoing-bg: #F0FDF4;
+  --color-status-ongoing-border: #86EFAC;
+  --color-status-available: #0D9488;
+  --color-status-available-bg: #F0FDFA;
+  --color-status-upcoming: #D97706;
+  --color-status-upcoming-bg: #FFFBEB;
+  --color-status-upcoming-border: #FCD34D;
+  --color-status-cancelled: #DC2626;
+  --color-status-cancelled-bg: #FEF2F2;
+  --color-status-cancelled-border: #FCA5A5;
+  --color-status-rescheduled: #7C3AED;
+  --color-status-rescheduled-bg: #F5F3FF;
+  --color-status-rescheduled-border: #C4B5FD;
+  --color-status-completed: #6B7280;
+  --color-status-completed-bg: #F9FAFB;
+
+  --color-surface: #F8F9FC;
+  --color-surface-card: #FFFFFF;
+  --color-border: #E2E8F0;
+  --color-border-strong: #CBD5E1;
+  --color-text: #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94A3B8;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  background-color: #F8F9FC;
+  color: #0F172A;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #CBD5E1 transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 3px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
