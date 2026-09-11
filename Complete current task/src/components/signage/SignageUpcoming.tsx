@@ -18,39 +18,39 @@ export default function SignageUpcoming() {
           <span className="text-sm text-white/40 font-600">{upcoming.length} upcoming</span>
         </div>
 
-        <div className="grid grid-cols-2 gap-5 flex-1">
+        <div className="grid grid-cols-2 gap-6 flex-1">
           {upcoming.map(s => (
-            <div key={s.id} className="rounded-2xl border border-amber-500/25 bg-amber-950/30 p-7 flex flex-col gap-4 relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-1 h-full bg-amber-400 rounded-l-2xl" />
+            <div key={s.id} className="rounded-3xl border-2 border-amber-500/35 bg-gradient-to-b from-amber-950/40 to-[#1A1208]/70 p-8 lg:p-9 flex flex-col justify-between relative overflow-hidden shadow-2xl min-h-[420px]">
+              <div className="absolute top-0 left-0 w-2 h-full bg-amber-400 rounded-l-3xl shadow-[0_0_15px_rgba(251,191,36,0.5)]" />
 
               <div className="flex items-center justify-between">
-                <span className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/15 px-4 py-1.5 text-sm font-700 text-amber-400">
-                  <span className="size-2 rounded-full bg-amber-400" />
+                <span className="inline-flex items-center gap-2.5 rounded-full border border-amber-500/50 bg-amber-500/25 px-4.5 py-1.5 text-base font-extrabold text-amber-300">
+                  <span className="size-2.5 rounded-full bg-amber-400 animate-ping" />
                   Upcoming Soon
                 </span>
-                <span className="font-mono text-sm text-white/40">{s.type}</span>
+                <span className="font-mono text-base font-semibold px-3 py-1 rounded-lg bg-white/5 text-white/60 border border-white/10">{s.type}</span>
               </div>
 
-              <div>
-                <p className="font-mono text-5xl font-800 text-white leading-none tracking-tight">{s.room}</p>
-                <p className="text-white/30 text-sm font-500 mt-1">Floor {s.floor} · {s.side} Side</p>
+              <div className="my-1">
+                <p className="font-mono text-6xl lg:text-7xl font-black text-white leading-none tracking-tight">{s.room}</p>
+                <p className="text-white/40 text-sm font-semibold mt-1.5">Floor {s.floor} · {s.side} Side</p>
               </div>
 
               <div className="h-px bg-white/10" />
 
-              <div>
-                <p className="font-mono text-base font-700 text-amber-400">{s.module}</p>
-                <p className="text-lg font-700 text-white leading-snug mt-0.5">{s.moduleName}</p>
+              <div className="space-y-1">
+                <p className="font-mono text-lg lg:text-xl font-black text-amber-400">{s.module}</p>
+                <p className="text-xl lg:text-2xl font-extrabold text-white leading-snug">{s.moduleName}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 mt-auto">
-                <div>
-                  <p className="text-white/40 text-xs font-600 uppercase tracking-wider mb-1">Lecturer</p>
-                  <p className="text-white font-600 text-sm">{s.lecturer}</p>
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10 mt-auto">
+                <div className="bg-white/5 rounded-2xl p-3.5 border border-white/5">
+                  <p className="text-white/40 text-xs font-bold uppercase tracking-wider mb-1">Lecturer</p>
+                  <p className="text-white font-bold text-base">{s.lecturer}</p>
                 </div>
-                <div>
-                  <p className="text-white/40 text-xs font-600 uppercase tracking-wider mb-1">Starts At</p>
-                  <p className="font-mono text-amber-300 font-800 text-2xl">{s.start}</p>
+                <div className="bg-amber-500/10 rounded-2xl p-3.5 border border-amber-500/20">
+                  <p className="text-amber-300/70 text-xs font-bold uppercase tracking-wider mb-1">Starts At</p>
+                  <p className="font-mono text-amber-300 font-black text-2xl lg:text-3xl">{s.start}</p>
                 </div>
               </div>
             </div>

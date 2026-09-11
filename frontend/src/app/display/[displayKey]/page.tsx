@@ -158,7 +158,7 @@ export default function SignageDisplayPage({
             <div className="lg:col-span-2 space-y-6 flex flex-col justify-between">
               {/* Status Header Badge */}
               <div
-                className={`p-6 rounded-3xl border backdrop-blur-xl transition-all ${
+                className={`p-7 lg:p-8 rounded-3xl border backdrop-blur-xl transition-all ${
                   occupancyStatus === 'OCCUPIED'
                     ? 'bg-rose-950/40 border-rose-500/40 text-rose-300'
                     : occupancyStatus === 'UPCOMING_SOON'
@@ -167,9 +167,9 @@ export default function SignageDisplayPage({
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3.5">
                     <span
-                      className={`h-4 w-4 rounded-full animate-ping ${
+                      className={`h-5 w-5 rounded-full animate-ping ${
                         occupancyStatus === 'OCCUPIED'
                           ? 'bg-rose-500'
                           : occupancyStatus === 'UPCOMING_SOON'
@@ -177,7 +177,7 @@ export default function SignageDisplayPage({
                           : 'bg-emerald-500'
                       }`}
                     />
-                    <span className="text-xl md:text-2xl font-black uppercase tracking-wider">
+                    <span className="text-2xl md:text-3xl font-black uppercase tracking-wider">
                       {occupancyStatus === 'OCCUPIED'
                         ? 'Lecture In Session'
                         : occupancyStatus === 'UPCOMING_SOON'
@@ -185,46 +185,46 @@ export default function SignageDisplayPage({
                         : 'Hall Available'}
                     </span>
                   </div>
-                  <span className="text-xs font-mono px-3 py-1 rounded-full bg-slate-900/60 border border-slate-700/60 text-slate-300">
-                    Room Capacity: {room?.capacity ?? '—'} Seats
+                  <span className="text-sm font-mono px-4 py-1.5 rounded-full bg-slate-900/70 border border-slate-700 text-slate-200">
+                    Room Capacity: <strong className="text-white">{room?.capacity ?? '—'} Seats</strong>
                   </span>
                 </div>
               </div>
 
               {/* Current Session Card */}
               {currentSession ? (
-                <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-8 space-y-6 shadow-2xl backdrop-blur-xl flex-1 flex flex-col justify-between">
+                <div className="bg-slate-900/95 border border-slate-800 rounded-3xl p-10 lg:p-12 space-y-8 shadow-2xl backdrop-blur-xl flex-1 flex flex-col justify-between min-h-[420px]">
                   <div>
-                    <div className="flex items-center gap-3 text-cyan-400 font-mono font-bold text-sm">
-                      <BookOpen className="h-5 w-5" />
+                    <div className="flex items-center gap-3 text-cyan-400 font-mono font-bold text-base">
+                      <BookOpen className="h-6 w-6" />
                       <span>{currentSession.module?.code} — {currentSession.module?.name}</span>
                     </div>
 
-                    <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight mt-3 leading-tight">
+                    <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight mt-4 leading-tight">
                       {currentSession.title}
                     </h2>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-800">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-xl bg-slate-800 flex items-center justify-center text-cyan-400">
-                        <User className="h-5 w-5" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6 border-t border-slate-800">
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-2xl bg-slate-800 flex items-center justify-center text-cyan-400">
+                        <User className="h-6 w-6" />
                       </div>
                       <div>
-                        <div className="text-xs text-slate-400 uppercase font-semibold">Lecturer</div>
-                        <div className="text-base font-bold text-slate-200">
+                        <div className="text-xs text-slate-400 uppercase font-bold tracking-wider">Lecturer</div>
+                        <div className="text-lg md:text-xl font-extrabold text-slate-100">
                           {currentSession.lecturer?.fullName}
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-xl bg-slate-800 flex items-center justify-center text-cyan-400">
-                        <Clock className="h-5 w-5" />
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-2xl bg-slate-800 flex items-center justify-center text-cyan-400">
+                        <Clock className="h-6 w-6" />
                       </div>
                       <div>
-                        <div className="text-xs text-slate-400 uppercase font-semibold">Scheduled Time</div>
-                        <div className="text-base font-bold text-white font-mono">
+                        <div className="text-xs text-slate-400 uppercase font-bold tracking-wider">Scheduled Time</div>
+                        <div className="text-lg md:text-xl font-black text-white font-mono">
                           {new Date(currentSession.startDateTime).toLocaleTimeString([], {
                             hour: '2-digit',
                             minute: '2-digit',
@@ -240,20 +240,20 @@ export default function SignageDisplayPage({
                   </div>
 
                   {currentSession.notes && (
-                    <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 text-xs text-slate-300 flex items-start gap-2">
-                      <Info className="h-4 w-4 text-cyan-400 shrink-0 mt-0.5" />
+                    <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 text-sm text-slate-300 flex items-start gap-2.5">
+                      <Info className="h-5 w-5 text-cyan-400 shrink-0 mt-0.5" />
                       <span>{currentSession.notes}</span>
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="bg-slate-900/60 border border-slate-800/80 rounded-3xl p-12 text-center space-y-4 flex-1 flex flex-col justify-center items-center">
-                  <div className="h-16 w-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                    <CheckCircle2 className="h-8 w-8" />
+                <div className="bg-slate-900/60 border border-slate-800/80 rounded-3xl p-14 text-center space-y-4 flex-1 flex flex-col justify-center items-center min-h-[420px]">
+                  <div className="h-20 w-20 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                    <CheckCircle2 className="h-10 w-10" />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-white">No Lecture Currently Running</h3>
-                    <p className="text-slate-400 text-sm mt-1 max-w-md">
+                    <h3 className="text-3xl font-extrabold text-white">No Lecture Currently Running</h3>
+                    <p className="text-slate-400 text-base mt-2 max-w-lg">
                       This lecture hall is open for quiet study or upcoming session preparation.
                     </p>
                   </div>
@@ -263,30 +263,30 @@ export default function SignageDisplayPage({
 
             {/* Next Session Column (1 Col) */}
             <div className="space-y-6">
-              <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 space-y-6 flex flex-col justify-between h-full">
+              <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-8 lg:p-10 space-y-6 flex flex-col justify-between h-full min-h-[480px]">
                 <div>
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-cyan-400" />
+                  <h3 className="text-base font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2.5">
+                    <Calendar className="h-5 w-5 text-cyan-400" />
                     <span>Up Next Today</span>
                   </h3>
 
                   {nextSession ? (
-                    <div className="mt-4 p-5 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-4">
-                      <div className="text-xs font-mono text-cyan-400 font-bold">
+                    <div className="mt-6 p-6 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-5">
+                      <div className="text-sm font-mono text-cyan-400 font-bold">
                         {nextSession.module?.code}
                       </div>
-                      <h4 className="text-xl font-bold text-white leading-snug">
+                      <h4 className="text-2xl font-black text-white leading-snug">
                         {nextSession.title}
                       </h4>
 
-                      <div className="space-y-2 text-xs text-slate-400 pt-2 border-t border-slate-800/80">
+                      <div className="space-y-3 text-sm text-slate-400 pt-3 border-t border-slate-800">
                         <div className="flex items-center justify-between">
                           <span>Lecturer:</span>
-                          <strong className="text-slate-200">{nextSession.lecturer?.fullName}</strong>
+                          <strong className="text-slate-100 font-bold">{nextSession.lecturer?.fullName}</strong>
                         </div>
                         <div className="flex items-center justify-between">
                           <span>Time:</span>
-                          <strong className="text-white font-mono">
+                          <strong className="text-white font-mono font-bold text-base">
                             {new Date(nextSession.startDateTime).toLocaleTimeString([], {
                               hour: '2-digit',
                               minute: '2-digit',
@@ -296,13 +296,13 @@ export default function SignageDisplayPage({
                       </div>
                     </div>
                   ) : (
-                    <div className="mt-4 p-6 rounded-2xl bg-slate-950/40 border border-slate-800/60 text-center text-xs text-slate-500">
+                    <div className="mt-6 p-8 rounded-2xl bg-slate-950/40 border border-slate-800/60 text-center text-sm text-slate-500">
                       No further lectures scheduled for today.
                     </div>
                   )}
                 </div>
 
-                <div className="text-center text-[10px] text-slate-500 border-t border-slate-800/80 pt-4">
+                <div className="text-center text-xs text-slate-500 border-t border-slate-800/80 pt-4">
                   Refreshed every {data?.display.refreshIntervalSeconds || 30} seconds
                 </div>
               </div>
@@ -311,19 +311,19 @@ export default function SignageDisplayPage({
         ) : (
           /* Multi-room Area Display */
           <div className="space-y-6">
-            <h2 className="text-xl font-bold text-white">Area Rooms Occupancy Overview</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <h2 className="text-2xl font-bold text-white">Area Rooms Occupancy Overview</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {data?.rooms?.map((rmStatus) => (
                 <div
                   key={rmStatus.room.id}
-                  className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-lg"
+                  className="bg-slate-900/95 border border-slate-800 rounded-3xl p-8 space-y-5 shadow-xl"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-lg font-extrabold text-white font-mono">
+                    <span className="text-2xl font-black text-white font-mono">
                       {rmStatus.room.code}
                     </span>
                     <span
-                      className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
+                      className={`text-sm font-bold px-3.5 py-1 rounded-full ${
                         rmStatus.occupancyStatus === 'OCCUPIED'
                           ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
                           : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
@@ -334,16 +334,16 @@ export default function SignageDisplayPage({
                   </div>
 
                   {rmStatus.currentSession ? (
-                    <div className="space-y-1">
-                      <div className="text-sm font-bold text-slate-200">
+                    <div className="space-y-2">
+                      <div className="text-lg font-extrabold text-slate-100 leading-snug">
                         {rmStatus.currentSession.title}
                       </div>
-                      <div className="text-xs text-slate-400">
+                      <div className="text-sm text-slate-400 font-medium">
                         {rmStatus.currentSession.lecturer?.fullName}
                       </div>
                     </div>
                   ) : (
-                    <div className="text-xs text-slate-500 italic">No active session</div>
+                    <div className="text-sm text-slate-500 italic py-2">No active session</div>
                   )}
                 </div>
               ))}
