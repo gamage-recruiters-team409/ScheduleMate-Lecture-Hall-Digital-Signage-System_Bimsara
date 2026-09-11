@@ -1,0 +1,1692 @@
+{
+  "info": {
+    "_postman_id": "schedulemate-api-v1",
+    "name": "ScheduleMate API",
+    "description": "# ScheduleMate — Lecture Hall Digital Signage System\n**Sparkline Academy**\n\nComplete API collection for the ScheduleMate backend.\n\n## How to Use\n1. Import both this collection and the `ScheduleMate-Local.postman_environment.json` file.\n2. Select the **ScheduleMate — Local** environment.\n3. Run **Auth → Login** first — the token is automatically saved to the environment.\n4. All protected endpoints will use the saved token automatically.\n\n## Authentication\nAll admin endpoints require a valid JWT. After login the `accessToken` is captured in the `token` environment variable and sent as a `Bearer` header automatically via the collection-level pre-request script.\n\n## API Base URL\n`http://localhost:3001/api`",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "buildingId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "floorId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "sideId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "roomId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "lecturerId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "moduleId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "sessionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "displayConfigId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 Auth",
+      "description": "Authentication endpoints — login, logout, and profile.",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response has accessToken', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('accessToken');",
+                  "    pm.collectionVariables.set('token', json.accessToken);",
+                  "    console.log('✅ Token saved to collection variable');",
+                  "});",
+                  "pm.test('Response has user object', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.user).to.have.property('email');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@sparkline.ac\",\n  \"password\": \"Admin@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login with admin credentials. On success, the JWT `accessToken` is automatically saved to the `token` collection variable and used by all subsequent authenticated requests."
+          }
+        },
+        {
+          "name": "Get My Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response has user', () => {",
+                  "    pm.expect(pm.response.json()).to.have.property('user');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "Returns the currently authenticated admin's profile."
+          }
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('token', '');",
+                  "console.log('🔓 Token cleared');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            },
+            "description": "Clears the HTTP-only cookie and removes the token from the collection variable."
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏢 Buildings",
+      "description": "Manage campus buildings.",
+      "item": [
+        {
+          "name": "List All Buildings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response is an array', () => {",
+                  "    pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "const data = pm.response.json();",
+                  "if (data.length > 0) {",
+                  "    pm.collectionVariables.set('buildingId', data[0].id);",
+                  "    console.log('buildingId set to:', data[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/buildings",
+              "host": ["{{baseUrl}}"],
+              "path": ["buildings"]
+            },
+            "description": "Returns all buildings. Also saves the first building's ID to `buildingId`."
+          }
+        },
+        {
+          "name": "Get Building by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response has correct fields', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.keys(['id', 'name', 'code', 'isActive', 'createdAt', 'updatedAt']);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/buildings/{{buildingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["buildings", "{{buildingId}}"]
+            },
+            "description": "Returns a single building by its ID."
+          }
+        },
+        {
+          "name": "Create Building",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Created building has correct name', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.name).to.eql('Test Building');",
+                  "    pm.collectionVariables.set('buildingId', json.id);",
+                  "    console.log('New buildingId:', json.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Building\",\n  \"code\": \"TB-01\",\n  \"description\": \"A test building created via Postman\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/buildings",
+              "host": ["{{baseUrl}}"],
+              "path": ["buildings"]
+            },
+            "description": "Creates a new building. `name` and `code` must be unique."
+          }
+        },
+        {
+          "name": "Update Building",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Description was updated', () => {",
+                  "    pm.expect(pm.response.json().description).to.include('Updated');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated via Postman\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/buildings/{{buildingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["buildings", "{{buildingId}}"]
+            },
+            "description": "Partially updates a building. All fields are optional."
+          }
+        },
+        {
+          "name": "Toggle Building Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('isActive was toggled', () => {",
+                  "    pm.expect(pm.response.json()).to.have.property('isActive');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/buildings/{{buildingId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["buildings", "{{buildingId}}", "status"]
+            },
+            "description": "Toggles `isActive` for a building."
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏗️ Floors",
+      "description": "Manage building floors.",
+      "item": [
+        {
+          "name": "List All Floors",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "if (data.length > 0) {",
+                  "    pm.collectionVariables.set('floorId', data[0].id);",
+                  "    console.log('floorId set to:', data[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/floors",
+              "host": ["{{baseUrl}}"],
+              "path": ["floors"]
+            },
+            "description": "Returns all floors. Optionally filter by `?buildingId=`."
+          }
+        },
+        {
+          "name": "List Floors by Building",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('All floors belong to the building', () => {",
+                  "    const data = pm.response.json();",
+                  "    data.forEach(f => pm.expect(f.buildingId).to.eql(pm.collectionVariables.get('buildingId')));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/floors?buildingId={{buildingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["floors"],
+              "query": [{ "key": "buildingId", "value": "{{buildingId}}" }]
+            },
+            "description": "Returns floors belonging to a specific building."
+          }
+        },
+        {
+          "name": "Get Floor by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/floors/{{floorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["floors", "{{floorId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Floor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('floorId', json.id);",
+                  "console.log('New floorId:', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"buildingId\": \"{{buildingId}}\",\n  \"name\": \"Ground Floor\",\n  \"floorNumber\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/floors",
+              "host": ["{{baseUrl}}"],
+              "path": ["floors"]
+            },
+            "description": "`[buildingId, floorNumber]` must be unique within a building."
+          }
+        },
+        {
+          "name": "Update Floor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ground Floor (Updated)\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/floors/{{floorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["floors", "{{floorId}}"]
+            }
+          }
+        },
+        {
+          "name": "Toggle Floor Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/floors/{{floorId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["floors", "{{floorId}}", "status"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🗂️ Sides",
+      "description": "Manage floor sides/wings.",
+      "item": [
+        {
+          "name": "List All Sides",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "if (data.length > 0) {",
+                  "    pm.collectionVariables.set('sideId', data[0].id);",
+                  "    console.log('sideId set to:', data[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sides",
+              "host": ["{{baseUrl}}"],
+              "path": ["sides"]
+            },
+            "description": "Returns all sides. Optionally filter by `?floorId=`."
+          }
+        },
+        {
+          "name": "List Sides by Floor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sides?floorId={{floorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["sides"],
+              "query": [{ "key": "floorId", "value": "{{floorId}}" }]
+            }
+          }
+        },
+        {
+          "name": "Get Side by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sides/{{sideId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["sides", "{{sideId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Side",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('sideId', json.id);",
+                  "console.log('New sideId:', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"floorId\": \"{{floorId}}\",\n  \"name\": \"North Wing\",\n  \"code\": \"NW\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sides",
+              "host": ["{{baseUrl}}"],
+              "path": ["sides"]
+            },
+            "description": "`[floorId, name]` must be unique."
+          }
+        },
+        {
+          "name": "Update Side",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"North Wing (Updated)\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sides/{{sideId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["sides", "{{sideId}}"]
+            }
+          }
+        },
+        {
+          "name": "Toggle Side Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sides/{{sideId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["sides", "{{sideId}}", "status"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🚪 Rooms",
+      "description": "Manage lecture halls, labs, and classrooms.",
+      "item": [
+        {
+          "name": "List All Rooms",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "if (data.length > 0) {",
+                  "    pm.collectionVariables.set('roomId', data[0].id);",
+                  "    console.log('roomId set to:', data[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/rooms",
+              "host": ["{{baseUrl}}"],
+              "path": ["rooms"]
+            },
+            "description": "Returns all rooms. Optionally filter by `?sideId=`."
+          }
+        },
+        {
+          "name": "List Rooms by Side",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/rooms?sideId={{sideId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["rooms"],
+              "query": [{ "key": "sideId", "value": "{{sideId}}" }]
+            }
+          }
+        },
+        {
+          "name": "Get Room by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/rooms/{{roomId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["rooms", "{{roomId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Room Daily Schedule",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response has sessions array', () => {",
+                  "    pm.expect(pm.response.json()).to.have.property('sessions');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/rooms/{{roomId}}/schedule?date=2025-09-15",
+              "host": ["{{baseUrl}}"],
+              "path": ["rooms", "{{roomId}}", "schedule"],
+              "query": [{ "key": "date", "value": "2025-09-15" }]
+            },
+            "description": "Returns all sessions for a specific room on a given date (`YYYY-MM-DD` format)."
+          }
+        },
+        {
+          "name": "Create Room",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('roomId', json.id);",
+                  "console.log('New roomId:', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sideId\": \"{{sideId}}\",\n  \"name\": \"Lecture Hall 101\",\n  \"code\": \"LH-101-TEST\",\n  \"capacity\": 120,\n  \"roomType\": \"LECTURE_HALL\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rooms",
+              "host": ["{{baseUrl}}"],
+              "path": ["rooms"]
+            },
+            "description": "Room `code` must be globally unique.\n\n**roomType options:** `LECTURE_HALL`, `LABORATORY`, `CLASSROOM`, `AUDITORIUM`, `OTHER`"
+          }
+        },
+        {
+          "name": "Update Room",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"capacity\": 150\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rooms/{{roomId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["rooms", "{{roomId}}"]
+            }
+          }
+        },
+        {
+          "name": "Toggle Room Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/rooms/{{roomId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["rooms", "{{roomId}}", "status"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👨‍🏫 Lecturers",
+      "description": "Manage lecturers and their profiles.",
+      "item": [
+        {
+          "name": "List All Lecturers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "if (data.length > 0) {",
+                  "    pm.collectionVariables.set('lecturerId', data[0].id);",
+                  "    console.log('lecturerId set to:', data[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lecturers",
+              "host": ["{{baseUrl}}"],
+              "path": ["lecturers"]
+            },
+            "description": "Returns all lecturers. Optionally filter by `?search=name`."
+          }
+        },
+        {
+          "name": "Search Lecturers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lecturers?search=Silva",
+              "host": ["{{baseUrl}}"],
+              "path": ["lecturers"],
+              "query": [{ "key": "search", "value": "Silva" }]
+            },
+            "description": "Full-text search across `fullName`, `email`, and `department`."
+          }
+        },
+        {
+          "name": "Get Lecturer by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lecturers/{{lecturerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["lecturers", "{{lecturerId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Lecturer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('lecturerId', json.id);",
+                  "console.log('New lecturerId:', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Dr. Test Lecturer\",\n  \"employeeCode\": \"EMP-999\",\n  \"email\": \"test.lecturer@sparkline.ac\",\n  \"phone\": \"+94771234567\",\n  \"department\": \"Computer Science\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lecturers",
+              "host": ["{{baseUrl}}"],
+              "path": ["lecturers"]
+            },
+            "description": "`email` must be unique if provided."
+          }
+        },
+        {
+          "name": "Update Lecturer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+94779999999\",\n  \"department\": \"Information Technology\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lecturers/{{lecturerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["lecturers", "{{lecturerId}}"]
+            }
+          }
+        },
+        {
+          "name": "Toggle Lecturer Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lecturers/{{lecturerId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["lecturers", "{{lecturerId}}", "status"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📚 Academic Modules",
+      "description": "Manage academic modules (courses/subjects).",
+      "item": [
+        {
+          "name": "List All Modules",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "if (data.length > 0) {",
+                  "    pm.collectionVariables.set('moduleId', data[0].id);",
+                  "    console.log('moduleId set to:', data[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/modules",
+              "host": ["{{baseUrl}}"],
+              "path": ["modules"]
+            },
+            "description": "Returns all academic modules. Optionally filter by `?search=`."
+          }
+        },
+        {
+          "name": "Search Modules",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/modules?search=CS",
+              "host": ["{{baseUrl}}"],
+              "path": ["modules"],
+              "query": [{ "key": "search", "value": "CS" }]
+            }
+          }
+        },
+        {
+          "name": "Get Module by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/modules/{{moduleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["modules", "{{moduleId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Module",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('moduleId', json.id);",
+                  "console.log('New moduleId:', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"CS-TEST-001\",\n  \"name\": \"Test Module — Introduction to Testing\",\n  \"description\": \"A test module created via Postman\",\n  \"department\": \"Computer Science\",\n  \"level\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/modules",
+              "host": ["{{baseUrl}}"],
+              "path": ["modules"]
+            },
+            "description": "Module `code` must be globally unique."
+          }
+        },
+        {
+          "name": "Update Module",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated description via Postman\",\n  \"level\": 3\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/modules/{{moduleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["modules", "{{moduleId}}"]
+            }
+          }
+        },
+        {
+          "name": "Toggle Module Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/modules/{{moduleId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["modules", "{{moduleId}}", "status"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📅 Sessions",
+      "description": "Manage scheduled sessions. Room AND lecturer conflict checks are enforced.",
+      "item": [
+        {
+          "name": "List All Sessions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "if (Array.isArray(data) && data.length > 0) {",
+                  "    pm.collectionVariables.set('sessionId', data[0].id);",
+                  "    console.log('sessionId set to:', data[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sessions",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions"]
+            },
+            "description": "Returns all sessions. Supports multiple query filters — see below."
+          }
+        },
+        {
+          "name": "Filter Sessions — by Room",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sessions?roomId={{roomId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions"],
+              "query": [{ "key": "roomId", "value": "{{roomId}}" }]
+            }
+          }
+        },
+        {
+          "name": "Filter Sessions — by Lecturer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sessions?lecturerId={{lecturerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions"],
+              "query": [{ "key": "lecturerId", "value": "{{lecturerId}}" }]
+            }
+          }
+        },
+        {
+          "name": "Filter Sessions — by Date Range",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sessions?startDate=2025-09-01&endDate=2025-09-30",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions"],
+              "query": [
+                { "key": "startDate", "value": "2025-09-01" },
+                { "key": "endDate", "value": "2025-09-30" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filter Sessions — by Status (SCHEDULED)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sessions?status=SCHEDULED",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions"],
+              "query": [{ "key": "status", "value": "SCHEDULED" }]
+            }
+          }
+        },
+        {
+          "name": "Get Session by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sessions/{{sessionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "{{sessionId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('sessionId', json.id);",
+                  "console.log('New sessionId:', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roomId\": \"{{roomId}}\",\n  \"moduleId\": \"{{moduleId}}\",\n  \"lecturerId\": \"{{lecturerId}}\",\n  \"title\": \"Postman Test Session\",\n  \"sessionType\": \"LECTURE\",\n  \"startDateTime\": \"2025-09-20T09:00:00.000Z\",\n  \"endDateTime\": \"2025-09-20T11:00:00.000Z\",\n  \"notes\": \"Created via Postman collection test\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sessions",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions"]
+            },
+            "description": "Creates a session with conflict detection for both room and lecturer.\n\n**sessionType options:** `LECTURE`, `TUTORIAL`, `PRACTICAL`, `LABORATORY`, `EXAM`, `MEETING`, `EVENT`, `OTHER`\n\n**Conflict rules:**\n- A room cannot have two overlapping SCHEDULED sessions\n- A lecturer cannot have two overlapping SCHEDULED sessions"
+          }
+        },
+        {
+          "name": "Create Session — Conflict Test (same room)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Should return 409 Conflict', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roomId\": \"{{roomId}}\",\n  \"moduleId\": \"{{moduleId}}\",\n  \"lecturerId\": \"{{lecturerId}}\",\n  \"title\": \"Conflicting Session — Same Room\",\n  \"sessionType\": \"TUTORIAL\",\n  \"startDateTime\": \"2025-09-20T10:00:00.000Z\",\n  \"endDateTime\": \"2025-09-20T12:00:00.000Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sessions",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions"]
+            },
+            "description": "This request overlaps with the previously created session in the same room. Expected: **409 Conflict**."
+          }
+        },
+        {
+          "name": "Update Session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Updated via Postman\",\n  \"title\": \"Postman Test Session (Updated)\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sessions/{{sessionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "{{sessionId}}"]
+            },
+            "description": "Partially updates a session. Conflict checks re-run if room, lecturer, or times change."
+          }
+        },
+        {
+          "name": "Cancel Session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Session status is CANCELLED', () => {",
+                  "    pm.expect(pm.response.json().status).to.eql('CANCELLED');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sessions/{{sessionId}}/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "{{sessionId}}", "cancel"]
+            },
+            "description": "Marks a session as CANCELLED. Cancelled sessions are excluded from all public signage views."
+          }
+        }
+      ]
+    },
+    {
+      "name": "📺 Display Configurations",
+      "description": "Configure digital signage displays. Each display has a unique key and is scoped to a room, side, floor, or building.",
+      "item": [
+        {
+          "name": "List All Display Configs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "if (data.length > 0) {",
+                  "    pm.collectionVariables.set('displayConfigId', data[0].id);",
+                  "    console.log('displayConfigId set to:', data[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/display-configurations",
+              "host": ["{{baseUrl}}"],
+              "path": ["display-configurations"]
+            }
+          }
+        },
+        {
+          "name": "Get Display Config by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/display-configurations/{{displayConfigId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["display-configurations", "{{displayConfigId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Display Config — Room Scope",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('displayConfigId', json.id);",
+                  "console.log('New displayConfigId:', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Test Display — Room 101\",\n  \"displayKey\": \"PM-TEST-ROOM-101\",\n  \"roomId\": \"{{roomId}}\",\n  \"refreshIntervalSeconds\": 30,\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/display-configurations",
+              "host": ["{{baseUrl}}"],
+              "path": ["display-configurations"]
+            },
+            "description": "Creates a room-scoped display. The `displayKey` must be globally unique.\n\n**Scope options (provide exactly one):**\n- `roomId` — single room display\n- `sideId` — all rooms on a side\n- `floorId` — all rooms on a floor\n- `buildingId` — all rooms in a building"
+          }
+        },
+        {
+          "name": "Create Display Config — Floor Scope",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 201', () => pm.response.to.have.status(201));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Floor 2 Overview Display\",\n  \"displayKey\": \"PM-TEST-FLOOR-2\",\n  \"floorId\": \"{{floorId}}\",\n  \"refreshIntervalSeconds\": 60,\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/display-configurations",
+              "host": ["{{baseUrl}}"],
+              "path": ["display-configurations"]
+            }
+          }
+        },
+        {
+          "name": "Update Display Config",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshIntervalSeconds\": 45\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/display-configurations/{{displayConfigId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["display-configurations", "{{displayConfigId}}"]
+            }
+          }
+        },
+        {
+          "name": "Toggle Display Config Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/display-configurations/{{displayConfigId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["display-configurations", "{{displayConfigId}}", "status"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🖥️ Public Signage (No Auth)",
+      "description": "Public endpoints — no authentication required. These power the digital signage displays.",
+      "item": [
+        {
+          "name": "Get Display Data by Key",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response has display metadata', () => {",
+                  "    pm.expect(pm.response.json()).to.have.property('display');",
+                  "});",
+                  "pm.test('Response has serverTime', () => {",
+                  "    pm.expect(pm.response.json()).to.have.property('serverTime');",
+                  "});",
+                  "pm.test('Response has occupancyStatus', () => {",
+                  "    const json = pm.response.json();",
+                  "    // Room scope includes occupancyStatus, area scope includes rooms array",
+                  "    pm.expect(json.occupancyStatus || json.rooms).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/displays/LH-101-MAIN",
+              "host": ["{{baseUrl}}"],
+              "path": ["public", "displays", "LH-101-MAIN"]
+            },
+            "description": "Fetches the signage payload for a display identified by its unique key.\n\n**Room-scope response includes:**\n- `occupancyStatus`: `OCCUPIED` | `AVAILABLE` | `UPCOMING_SOON`\n- `currentSession`: currently running session or null\n- `nextSession`: next upcoming session or null\n- `recentlyCompletedSessions`: sessions that ended in the last 2 hours\n\n**Area-scope (building/floor/side) response includes:**\n- `rooms[]`: array of rooms, each with their own occupancy status\n\n> Change `LH-101-MAIN` to any valid `displayKey` in your system."
+          }
+        },
+        {
+          "name": "Get Display Data — Floor/Area Scope",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200 or 404', () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/displays/FLOOR-5A-HALLWAY",
+              "host": ["{{baseUrl}}"],
+              "path": ["public", "displays", "FLOOR-5A-HALLWAY"]
+            },
+            "description": "Fetches a multi-room overview display. Returns `rooms[]` with occupancy status for each room."
+          }
+        },
+        {
+          "name": "Get Room Status by Code",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200 or 404', () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/rooms/LH-101/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["public", "rooms", "LH-101", "status"]
+            },
+            "description": "Returns current occupancy status for a room identified by its unique `code` (e.g. `LH-101`).\n\n> Change `LH-101` to any valid room `code` in your system."
+          }
+        },
+        {
+          "name": "Get Display — Not Found (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 404 for unknown display key', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/displays/NONEXISTENT-KEY-XYZ",
+              "host": ["{{baseUrl}}"],
+              "path": ["public", "displays", "NONEXISTENT-KEY-XYZ"]
+            },
+            "description": "Expected: **404 Not Found** — validates error handling for unknown display keys."
+          }
+        }
+      ]
+    }
+  ]
+}

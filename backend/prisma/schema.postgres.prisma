@@ -1,0 +1,174 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  ADMIN
+}
+
+enum RoomType {
+  LECTURE_HALL
+  LABORATORY
+  CLASSROOM
+  AUDITORIUM
+  OTHER
+}
+
+enum SessionType {
+  LECTURE
+  TUTORIAL
+  PRACTICAL
+  LABORATORY
+  EXAM
+  MEETING
+  EVENT
+  OTHER
+}
+
+enum SessionStatus {
+  SCHEDULED
+  CANCELLED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  fullName     String
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(ADMIN)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Building {
+  id                    String                 @id @default(cuid())
+  name                  String                 @unique
+  code                  String                 @unique
+  description           String?
+  isActive              Boolean                @default(true)
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  floors                Floor[]
+  displayConfigurations DisplayConfiguration[]
+}
+
+model Floor {
+  id                    String                 @id @default(cuid())
+  buildingId            String
+  name                  String
+  floorNumber           Int
+  isActive              Boolean                @default(true)
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  building              Building               @relation(fields: [buildingId], references: [id], onDelete: Restrict)
+  sides                 Side[]
+  displayConfigurations DisplayConfiguration[]
+
+  @@unique([buildingId, floorNumber])
+  @@index([buildingId])
+}
+
+model Side {
+  id                    String                 @id @default(cuid())
+  floorId               String
+  name                  String
+  code                  String?
+  isActive              Boolean                @default(true)
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  floor                 Floor                  @relation(fields: [floorId], references: [id], onDelete: Restrict)
+  rooms                 Room[]
+  displayConfigurations DisplayConfiguration[]
+
+  @@unique([floorId, name])
+  @@index([floorId])
+}
+
+model Room {
+  id                    String                 @id @default(cuid())
+  sideId                String
+  name                  String
+  code                  String                 @unique
+  capacity              Int?
+  roomType              RoomType               @default(LECTURE_HALL)
+  isActive              Boolean                @default(true)
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  side                  Side                   @relation(fields: [sideId], references: [id], onDelete: Restrict)
+  sessions              ScheduledSession[]
+  displayConfigurations DisplayConfiguration[]
+
+  @@index([sideId])
+}
+
+model Lecturer {
+  id           String             @id @default(cuid())
+  fullName     String
+  employeeCode String?
+  email        String?            @unique
+  phone        String?
+  department   String?
+  isActive     Boolean            @default(true)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  sessions     ScheduledSession[]
+}
+
+model AcademicModule {
+  id          String             @id @default(cuid())
+  code        String             @unique
+  name        String
+  description String?
+  department  String?
+  level       Int?
+  isActive    Boolean            @default(true)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  sessions    ScheduledSession[]
+}
+
+model ScheduledSession {
+  id            String        @id @default(cuid())
+  roomId        String
+  moduleId      String
+  lecturerId    String
+  title         String
+  sessionType   SessionType   @default(LECTURE)
+  startDateTime DateTime
+  endDateTime   DateTime
+  notes         String?
+  status        SessionStatus @default(SCHEDULED)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  room          Room          @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  module        AcademicModule @relation(fields: [moduleId], references: [id], onDelete: Restrict)
+  lecturer      Lecturer      @relation(fields: [lecturerId], references: [id], onDelete: Restrict)
+
+  @@index([roomId, startDateTime, endDateTime])
+  @@index([startDateTime])
+  @@index([status])
+}
+
+model DisplayConfiguration {
+  id                     String    @id @default(cuid())
+  name                   String
+  displayKey             String    @unique
+  roomId                 String?
+  buildingId             String?
+  floorId                String?
+  sideId                 String?
+  isActive               Boolean   @default(true)
+  refreshIntervalSeconds Int       @default(30)
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+  room                   Room?     @relation(fields: [roomId], references: [id])
+  building               Building? @relation(fields: [buildingId], references: [id])
+  floor                  Floor?    @relation(fields: [floorId], references: [id])
+  side                   Side?     @relation(fields: [sideId], references: [id])
+}
